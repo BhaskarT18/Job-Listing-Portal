@@ -25,7 +25,7 @@ const JobDetails = () => {
 
   useEffect(() => {
     // fetch job details
-    fetch(`http://localhost:5000/all-jobs/${id}`)
+    fetch(`http://localhost:8000/all-jobs/${id}`)
       .then((res) => res.json())
       .then((data) => setJob(data));
   }, []);

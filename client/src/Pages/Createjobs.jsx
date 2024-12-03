@@ -15,7 +15,7 @@ const Createjobs = () => {
   const onSubmit = (data) => {
     data.skills = selectedOption;
     // console.log(data); // To check the submitted form data
-    fetch("http://localhost:5000/add-job", {
+    fetch("http://localhost:8000/add-job", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
