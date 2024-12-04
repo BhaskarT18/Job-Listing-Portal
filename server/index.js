@@ -113,10 +113,7 @@ async function run() {
 
 run().catch(console.dir);
 
-// Routes
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
+
 
 // Start the server
 app.listen(8000, () => {
