@@ -11,7 +11,27 @@ const MyJob = () => {
   React.useEffect(() => {
     setIsLoading(true);
 
-    fetch(`http://localhost:8000/myJobs/vishal@gmail.com`)
+  //   // {  const email = localStorage.getItem("userEmail"); this is for dymaic 
+  //   console.log("this is email:",email)
+  //   if (email) {
+  //     fetch(`http://localhost:8000/myJobs/${email}`)
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         setJobs(data);
+  //         setIsLoading(false);
+  //       })
+  //       .catch((err) => {
+  //         console.error(err);
+  //         setIsLoading(false);
+  //       });
+  //   } else {
+  //     console.warn("User email not found.");
+  //     setIsLoading(false);
+  //   }
+  // }, [searchText]);}
+
+
+    fetch(`http://localhost:8000/myJobs/recruiter@techsolutions.com`)
       .then((res) => res.json())
       .then((data) => {
         setJobs(data);

@@ -59,7 +59,7 @@ const Navbar = () => {
         </div>
       </nav>
       {/* {navitems for mobile view } */}
-      <div className={`x-4 py-5 text-white bg-black rounded-sm ${isMenuOpen ? "" : "hidden"}` }>
+      <div className={`x-4 py-5 text-black bg-gray-200 border rounded-sm ${isMenuOpen ? "" : "hidden"}` }>
         <ul className="">
           {navItems.map(({ path, title }) => (
               <li key={path} className="text-base text-white first:text-white py-1 px-3">

@@ -6,12 +6,13 @@ import { FiCalendar, FiClock, FiDollarSign, FiMapPin } from "react-icons/fi";
 
 const Card = ({ data }) => {
   const {_id,companyName,jobTitle,companyLogo,minPrice,maxPrice,salaryType,jobLocation,postingDate,employmentType,description} = data;
+  console.log(companyLogo)
     return (
       <>
       
       <section className='card'>
             <Link to={`/job/${_id}`} className="flex gap-4 flex-col sm:flex-row items-start">
-                    <img src={companyLogo} alt="companyLogo"  />
+                    <div className="w-48 h-48 overflow-hidden rounded-lg border"><img src={companyLogo} className="w-full h-full object-cover" alt="companyLogo"  /></div>
                     <div>
                       <h4 className="text-primary mb-1">{companyName}</h4>
                       <h3 className="text-lg font-semibold mb-2">{jobTitle}</h3>

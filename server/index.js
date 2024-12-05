@@ -7,7 +7,9 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*',    
+}));
 app.use(express.json());
 
 // Use the MONGO_URI environment variable

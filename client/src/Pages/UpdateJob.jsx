@@ -24,6 +24,7 @@ const UpdateJob = () => {
     
   } = useLoaderData();
   console.log(id);
+  console.log(companyLogo)
 
   const [selectedOption, setSelectedOption] = useState(null);
   const {
