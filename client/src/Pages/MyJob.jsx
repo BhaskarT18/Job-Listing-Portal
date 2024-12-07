@@ -31,7 +31,7 @@ const MyJob = () => {
   // }, [searchText]);}
 
 
-    fetch(`http://localhost:8000/myJobs/recruiter@techsolutions.com`)
+    fetch(`http://localhost:8000/user-job`,{credentials:"include"})
       .then((res) => res.json())
       .then((data) => {
         setJobs(data);
