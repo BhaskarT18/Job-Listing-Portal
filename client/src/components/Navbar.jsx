@@ -1,13 +1,46 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import { FaBarsStaggered, FaXmark } from "react-icons/fa6";
 
 const Navbar = () => {
   const [isMenuOpen, setMenuOpen] = useState(false);
+  const [hideUser, setHideUser] = useState(true);
   const handleMenuToggler = () => {
     setMenuOpen(!isMenuOpen);
   };
+  useEffect(() => {
+    fetch("http://localhost:8000/protected")
+      .then((res) => res.json())
+      .then((data) => {
+       setHideUser(false)
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+  const handlelogout = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:8000/auth/logout", {
+        credentials:"include",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("User Logout!");
+        setHideUser(true)
+      } else {
+        setError(result.message || "Something went wrong. Please try again.");
+      }
+    } catch (err) {
+      setError("Unable to connect to the server.");
+    }
+  };
   const navItems = [
     { path: "/", title: "Start a search" },
     { path: "/my-job", title: "My Job" },
@@ -43,10 +76,14 @@ const Navbar = () => {
           ))}
         </ul>
         {/* singup and signin */}
-        <div className="text-base text-primary font-medium space-x-5 hidden lg:block">
-            <Link to="/login" className="py-2 px-5 border rounded">Log In</Link> 
-            <Link to="/signup" className="py-2 px-5 border rounded bg-blue text-white">Sing Up</Link> 
-        </div>
+{
+ hideUser? <div className="text-base text-primary font-medium space-x-5 hidden lg:block">
+ <Link to="/login" className="py-2 px-5 border rounded">Log In</Link> 
+ <Link to="/signup" className="py-2 px-5 border rounded bg-blue text-white">Sing Up</Link> 
+</div>:   <div className="text-base text-primary font-medium space-x-5 hidden lg:block">
+   <button className="py-2 px-5 border rounded" onClick={handlelogout}>Log Out</button>
+</div>
+}
 
         {/* {moible menu} */}
         <div className="md:hidden block">
