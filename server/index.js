@@ -35,18 +35,28 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 
 // Job Schema (for demoJobs collection)
+
 const jobSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  location: { type: String, required: true },
-  salary: { type: Number, required: true },
-  postedDate: { type: Date, default: Date.now }
+  jobTitle: { type: String, required: true }, // Updated field name
+  companyName: { type: String, required: true },
+  minPrice: { type: String, required: true }, // Assuming prices are in string format like "60k"
+  maxPrice: { type: String, required: true },
+  salaryType: { type: String, enum: ['Yearly', 'Monthly', 'Hourly'], required: true },
+  jobLocation: { type: String, required: true },
+  postingDate: { type: Date, default: Date.now },
+  experienceLevel: { type: String, enum: ['No Experience', 'Internship', 'Work remotely'], required: true },
+  companyLogo: { type: String, default: 'https://via.placeholder.com/150' }, // Default logo URL
+  employmentType: { type: String, enum: ['Full-time', 'Part-time', 'Contract', 'Temporary'], required: true },
+  jobDescription: { type: String, default: '' },
+  postedBy: { type: String, required: true, match: /.+@.+\..+/ }, // Validates email format
+  skills: { type: [String], default: [] }, // Array of skills, default to empty array
+  createdAt: { type: Date, default: Date.now }, // Fixed typo in field name
 });
 
-// Define the model for the demoJobs collection
-const Job = mongoose.model("Job", jobSchema, "demoJobs");
+const Job = mongoose.model('Job', jobSchema);
 
-// Middleware to Authenticate Token
+
+
 const authenticateToken = (req, res, next) => {
   const token = req.cookies?.token;
   if (!token) {
@@ -123,9 +133,128 @@ app.post("/auth/login", async (req, res) => {
     res.status(500).json({ message: "Error logging in.", error });
   }
 });
+app.put('/update-job/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params; // Get the job ID from the URL parameter
+  const {
+    jobTitle,
+    companyName,
+    minPrice,
+    maxPrice,
+    salaryType,
+    jobLocation,
+    postingDate,
+    experienceLevel,
+    companyLogo,
+    employmentType,
+    jobDescription,
+    skills
+  } = req.body; // Extract data from the request body
+
+  try {
+    // Find the job by ID and update the fields
+    const updatedJob = await Job.findByIdAndUpdate(
+      id, // Job ID
+      {
+        jobTitle,
+        companyName,
+        minPrice,
+        maxPrice,
+        salaryType,
+        jobLocation,
+        postingDate,
+        experienceLevel,
+        companyLogo,
+        employmentType,
+        jobDescription,
+        skills
+      },
+      { new: true } // Return the updated document
+    );
+
+    // If no job found, send a 404 error
+    if (!updatedJob) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    // Send a success response with the updated job details
+    res.status(200).json({
+      message: 'Job updated successfully',
+      job: updatedJob
+    });
+  } catch (error) {
+    // Handle any errors
+    console.error(error);
+    res.status(500).json({
+      message: 'Error updating job',
+      error: error.message
+    });
+  }
+});
+
+app.post("/job",authenticateToken, async  (req, res) => {
+  try {
+    const {
+      jobTitle,
+      companyName,
+      minPrice,
+      maxPrice,
+      salaryType,
+      jobLocation,
+      postingDate,
+      experienceLevel,
+      companyLogo,
+      employmentType,
+      jobDescription,
+      postedBy,
+      skills,
+    } = req.body;
+    const {email} = req.user
+    // Create a new job document
+    const newJob = new Job({
+      jobTitle,
+      companyName,
+      minPrice,
+      maxPrice,
+      salaryType,
+      jobLocation,
+      postingDate,
+      experienceLevel,
+      companyLogo,
+      employmentType,
+      jobDescription,
+      postedBy:email,
+      skills,
+    });
+
+    // Save the job to the database
+   const data= await newJob.save();
+    console.log(data);
+    res.status(201).json({ message: 'Job created successfully', job: newJob });
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating job', error: error.message });
+  }
+});
+
+// Delete Job
+app.delete("/job",authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find and delete the job by ID
+    const deletedJob = await Job.findByIdAndDelete(id);
+
+    if (!deletedJob) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
+    res.status(200).json({ message: 'Job deleted successfully', job: deletedJob });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting job', error: error.message });
+  }
+});
 
 // Logout Route
-app.post("/auth/logout", authenticateToken, (req, res) => {
+app.get("/auth/logout", (req, res) => {
   res.clearCookie("token");
   res.status(200).json({ message: "Logged out successfully." });
 });
@@ -150,7 +279,7 @@ app.get("/user-job",authenticateToken, async (req, res) => {
   try {
     const {email} = req.user
     console.log(email)
-    const jobs = await Job.find({email});
+    const jobs = await Job.find({postedBy:email});
     res.status(200).json(jobs);
   } catch (error) {
     res.status(500).json({ message: "Error fetching jobs.", error });
@@ -165,7 +294,15 @@ app.get("/all-jobs", async (req, res) => {
     res.status(500).json({ message: "Error fetching jobs.", error });
   }
 });
-
+app.get("/all-jobs/:id",authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const jobs = await Job.findById(id);
+    res.status(200).json(jobs);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching jobs.", error });
+  }
+});
 // Start the Server
 app.listen(8000, () => {
   console.log("Server started on port 8000");

@@ -9,10 +9,16 @@ const Navbar = () => {
     setMenuOpen(!isMenuOpen);
   };
   useEffect(() => {
-    fetch("http://localhost:8000/protected")
-      .then((res) => res.json())
-      .then((data) => {
-       setHideUser(false)
+    fetch("http://localhost:8000/protected",{credentials:"include"})
+      .then((res) => {
+       if(res.status==401)
+       {
+        setHideUser(true);
+       }
+       else if(res.status==200)
+       {
+        setHideUser(false);
+       }
       })
       .catch((err) => {
         console.log(err);
@@ -23,7 +29,7 @@ const Navbar = () => {
     try {
       const response = await fetch("http://localhost:8000/auth/logout", {
         credentials:"include",
-        method: "POST",
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },

@@ -1,6 +1,6 @@
 
-import { useLoaderData, useParams } from "react-router-dom";
-import React, { useState } from "react";
+import { useLoaderData, useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import CreatableSelect from "react-select/creatable";
 
@@ -25,7 +25,7 @@ const UpdateJob = () => {
   } = useLoaderData();
   console.log(id);
   console.log(companyLogo)
-
+  const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState(null);
   const {
     register,
@@ -34,31 +34,63 @@ const UpdateJob = () => {
     watch,
     formState: { errors },
   } = useForm();
-
-  const onSubmit = (data) => {
-    data.skills = selectedOption;
-    // console.log(data); // To check the submitted form data
-    fetch((`http://localhost:8000/update-job/${id}`), {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data), // Moved `body` outside of `headers`
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        console.log(result); // Log the result or handle it as needed
-        if (result.acknowledged === true) {
-          alert("Job Updated job Successfully");
-        }
-
-        reset();
+  useEffect(() => {
+    fetch("http://localhost:8000/protected",{credentials:"include"})
+      .then((res) => {
+       if(res.status==401)
+       {
+       navigate('/login')
+       }
       })
-      .catch((error) => {
-        console.error("Error:", error); // Optional: catch any errors
+      .catch((err) => {
+        console.log(err);
       });
+  }, []);
+  const onSubmit = async (data) => {
+    data.skills = selectedOption;
+  
+    try {
+      const response = await fetch(`http://localhost:8000/update-job/${id}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data), // Sending form data to backend
+      });
+  
+      const result = await response.json();
+      console.log(result);
+  
+      // If session expired (401 status)
+      if (result.status === 401) {
+        alert("Session expired. Please log in again.");
+  
+        const logoutResponse = await fetch("http://localhost:8000/auth/logout", {
+          credentials: "include",
+          method: "GET",
+        });
+  
+        if (logoutResponse.status === 200) {
+          navigate("/login"); // Redirect to login
+        }
+      }
+  
+      // If job update acknowledged
+      if (response.status===200) {
+        alert("Job updated successfully");
+        navigate('/my-job');  // Redirect to "my-job" page after update
+      }
+  
+      // Reset form after successful submission
+      reset();
+  
+    } catch (error) {
+      console.error("Error:", error); // Log any error that occurred during fetch
+    }
   };
-
+  
+  
   const options = [
     { value: "Javascript", label: "Javascript" },
     { value: "HTML", label: "HTML" },

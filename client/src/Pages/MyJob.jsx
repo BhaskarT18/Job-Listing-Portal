@@ -1,11 +1,11 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const MyJob = () => {
   const [jobs, setJobs] = React.useState([]);
   const [searchText, setSearchText] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
-
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemPerPage = 4;
   React.useEffect(() => {
@@ -30,7 +30,16 @@ const MyJob = () => {
   //   }
   // }, [searchText]);}
 
-
+  fetch("http://localhost:8000/protected",{credentials:"include"})
+  .then((res) => {
+    if(res.status==401)
+    {
+      navigate("/login");
+    }
+  })
+  .catch((err) => {
+  console.log(err);
+  });
     fetch(`http://localhost:8000/user-job`,{credentials:"include"})
       .then((res) => res.json())
       .then((data) => {
