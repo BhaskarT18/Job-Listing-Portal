@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import CreatableSelect from "react-select/creatable";
 
 const Createjobs = () => {
   const [selectedOption, setSelectedOption] = useState(null);
+  const navigate = useNavigate(); // Initialize the navigate function
   const {
     register,
     handleSubmit,
@@ -11,32 +13,55 @@ const Createjobs = () => {
     watch,
     formState: { errors },
   } = useForm();
-
-  const onSubmit = (data) => {
-    data.skills = selectedOption;
-    // console.log(data); // To check the submitted form data
-    fetch("http://localhost:8000/jobs", {
-      credentials:"include",
+  useEffect(() => {
+    fetch("http://localhost:8000/protected",{credentials:"include"})
+      .then((res) => {
+       if(res.status==401)
+       {
+       navigate('/login')
+       }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+  const onSubmit = async (data) => {
+    data.skills = selectedOption?.map(option => option.value) || [];
+  
+  try {
+   const res= await fetch("http://localhost:8000/job", {
+      credentials: "include",
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data), // Moved `body` outside of `headers`
+      body: JSON.stringify(data),
     })
-      .then((res) => res.json())
-      .then((result) => {
-        console.log(result); // Log the result or handle it as needed
-        if (result.acknowledged === true) {
-          alert("Job Added Successfully");
-        }
-
-        reset();
+    if (res.status === 401) {
+      alert("Session expired. Please log in again.");
+   const res= await   fetch("http://localhost:8000/auth/logout", {
+        credentials: "include",
+        method: "GET",
       })
-      .catch((error) => {
-        console.error("Error:", error); // Optional: catch any errors
-      });
-  };
+  if(res.status==200)
+  {
+    navigate("/login");
+  }
+     
+    }
+    if(res.ok && res.status==201)
+    {
+      alert("User registered successfully!");
+      reset();
+    }
 
+  } catch (error) {
+    console.error("Error:", error); // Log client-side errors
+    alert(error.message || "An unexpected error occurred.");
+  }
+
+  };
+  
   const options = [
     { value: "Javascript", label: "Javascript" },
     { value: "HTML", label: "HTML" },
