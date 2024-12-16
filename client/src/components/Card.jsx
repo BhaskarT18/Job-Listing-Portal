@@ -5,8 +5,8 @@ import { FiCalendar, FiClock, FiDollarSign, FiMapPin } from "react-icons/fi";
 
 
 const Card = ({ data }) => {
-  const {_id,companyName,jobTitle,companyLogo,minPrice,maxPrice,salaryType,jobLocation,postingDate,employmentType,description} = data;
-  console.log(companyLogo)
+  const {_id,companyName,jobTitle,companyLogo,minPrice,maxPrice,salaryType,jobLocation,postingDate,employmentType,jobDescription} = data;
+ 
     return (
       <>
       
@@ -22,7 +22,7 @@ const Card = ({ data }) => {
                           <span className="flex items-center gap-2"><FiDollarSign/>{minPrice }-{maxPrice}k</span>
                           <span className="flex items-center gap-2"><FiCalendar/>{postingDate}</span>
                       </div>
-                      <p className="text-base text-primary/70 ">{description}</p>
+                      <p className="text-base text-primary/70 ">{jobDescription}</p>
                     </div>
             </Link>
       </section>

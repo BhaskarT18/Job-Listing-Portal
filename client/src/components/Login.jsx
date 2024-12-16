@@ -33,7 +33,7 @@ const Login = () => {
 
       const data = await response.json(); // Assuming the token is returned in the response
       localStorage.setItem("token", data.token); // Store the JWT token in localStorage
-
+      alert("Login successful!");
       // Navigate to home page after successful login
       navigate("/");
     } catch (error) {

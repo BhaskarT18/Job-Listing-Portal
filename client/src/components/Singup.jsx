@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -19,7 +21,7 @@ const Signup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
+    setSuccess("");0
 
     try {
       const response = await fetch("http://localhost:8000/auth/signup", {
@@ -34,7 +36,9 @@ const Signup = () => {
 
       if (response.ok) {
         setSuccess("User registered successfully!");
+        alert("User created successfully!");
         setFormData({ fullName: "", email: "", password: "" });
+        navigate("/login"); 
       } else {
         setError(result.message || "Something went wrong. Please try again.");
       }

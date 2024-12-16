@@ -9,20 +9,23 @@ require("dotenv").config();
 const app = express();
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
 // MongoDB Connection with Mongoose
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 10000, // Timeout after 10 seconds
-}).then(() => {
-  console.log("Connected to MongoDB");
-}).catch((error) => {
-  console.error("MongoDB connection error:", error);
-});
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 10000, // Timeout after 10 seconds
+  })
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.error("MongoDB connection error:", error);
+  });
 
 // User Schema
 const userSchema = new mongoose.Schema({
@@ -36,31 +39,73 @@ const User = mongoose.model("User", userSchema);
 
 // Job Schema (for demoJobs collection)
 
+
 const jobSchema = new mongoose.Schema({
-  jobTitle: { type: String, required: true }, // Updated field name
-  companyName: { type: String, required: true },
-  minPrice: { type: String, required: true }, // Assuming prices are in string format like "60k"
-  maxPrice: { type: String, required: true },
-  salaryType: { type: String, enum: ['Yearly', 'Monthly', 'Hourly'], required: true },
-  jobLocation: { type: String, required: true },
-  postingDate: { type: Date, default: Date.now },
-  experienceLevel: { type: String, enum: ['No Experience', 'Internship', 'Work remotely'], required: true },
-  companyLogo: { type: String, default: 'https://via.placeholder.com/150' }, // Default logo URL
-  employmentType: { type: String, enum: ['Full-time', 'Part-time', 'Contract', 'Temporary'], required: true },
-  jobDescription: { type: String, default: '' },
-  postedBy: { type: String, required: true, match: /.+@.+\..+/ }, // Validates email format
-  skills: { type: [String], default: [] }, // Array of skills, default to empty array
-  createdAt: { type: Date, default: Date.now }, // Fixed typo in field name
-});
+  jobTitle: {
+    type: String,
+    required: true,
+  },
+  companyName: {
+    type: String,
+    required: true,
+  },
+  minPrice: {
+    type: String, // assuming salary is stored as a numeric value
+    required: true,
+  },
+  maxPrice: {
+    type: String, // assuming salary is stored as a numeric value
+    required: true,
+  },
+  salaryType: {
+    type: String,
+    
+    required: true,
+  },
+  jobLocation: {
+    type: String,
+    required: true,
+  },
+  postingDate: {
+    type: String,
+    required: true,
+    get: (date) => date.slice(0, 10), // Ensures the date is in 'YYYY-MM-DD' format
+  },
+  experienceLevel: {
+    type: String,
+    
+    required: true,
+  },
+  skills: {
+    type: [String], // array of strings for multiple skills
+    required: true,
+  },
+  companyLogo: {
+    type: String, // URL for the logo
+  },
+  employmentType: {
+    type: String,
+     // restrict to valid options
+    required: true,
+  },
+  jobDescription: {
+    type: String,
+    required: true,
+  },
+  postedBy: {
+    type: String, // email of the poster
+    required: true,
+  },
+})
 
-const Job = mongoose.model('Job', jobSchema);
-
-
+const Job = mongoose.model("Job", jobSchema);
 
 const authenticateToken = (req, res, next) => {
   const token = req.cookies?.token;
   if (!token) {
-    return res.status(401).json({ message: "Access denied. No token provided." });
+    return res
+      .status(401)
+      .json({ message: "Access denied. No token provided." });
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
@@ -95,15 +140,19 @@ app.post("/auth/signup", async (req, res) => {
   }
 });
 app.get("/protected", authenticateToken, (req, res) => {
-  res.status(200).json({ message: "You have access to protected data.", user: req.user });
+  res
+    .status(200)
+    .json({ message: "You have access to protected data.", user: req.user });
 });
 // Login Route
 app.post("/auth/login", async (req, res) => {
   const { email, password } = req.body;
-  console.log(req.body);
+  
 
   if (!email || !password) {
-    return res.status(400).json({ message: "Email and password are required." });
+    return res
+      .status(400)
+      .json({ message: "Email and password are required." });
   }
 
   try {
@@ -133,8 +182,9 @@ app.post("/auth/login", async (req, res) => {
     res.status(500).json({ message: "Error logging in.", error });
   }
 });
-app.put('/update-job/:id', authenticateToken, async (req, res) => {
-  const { id } = req.params; // Get the job ID from the URL parameter
+
+app.put("/update-job/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params; // Job ID from URL parameters
   const {
     jobTitle,
     companyName,
@@ -144,16 +194,16 @@ app.put('/update-job/:id', authenticateToken, async (req, res) => {
     jobLocation,
     postingDate,
     experienceLevel,
+    skills,
     companyLogo,
     employmentType,
     jobDescription,
-    skills
-  } = req.body; // Extract data from the request body
-
+    postedBy,
+  } = req.body
+  
   try {
-    // Find the job by ID and update the fields
     const updatedJob = await Job.findByIdAndUpdate(
-      id, // Job ID
+      id,
       {
         jobTitle,
         companyName,
@@ -163,53 +213,58 @@ app.put('/update-job/:id', authenticateToken, async (req, res) => {
         jobLocation,
         postingDate,
         experienceLevel,
+        skills,
         companyLogo,
         employmentType,
         jobDescription,
-        skills
+        postedBy,
       },
-      { new: true } // Return the updated document
+      { new: true } // Ensures the updated document is returned
     );
+
 
     // If no job found, send a 404 error
     if (!updatedJob) {
-      return res.status(404).json({ message: 'Job not found' });
+      return res.status(404).json({ message: "Job not found" });
     }
 
     // Send a success response with the updated job details
     res.status(200).json({
-      message: 'Job updated successfully',
-      job: updatedJob
+      message: "Job updated successfully",
+      job: updatedJob,
     });
   } catch (error) {
     // Handle any errors
     console.error(error);
     res.status(500).json({
-      message: 'Error updating job',
-      error: error.message
+      message: "Error updating job",
+      error: error.message,
     });
   }
 });
 
-app.post("/job",authenticateToken, async  (req, res) => {
+app.post("/job", authenticateToken, async (req, res) => {
   try {
     const {
       jobTitle,
-      companyName,
-      minPrice,
-      maxPrice,
-      salaryType,
-      jobLocation,
-      postingDate,
-      experienceLevel,
-      companyLogo,
-      employmentType,
-      jobDescription,
-      postedBy,
-      skills,
-    } = req.body;
-    const {email} = req.user
-    // Create a new job document
+    companyName,
+    minPrice,
+    maxPrice,
+    salaryType,
+    jobLocation,
+    postingDate,
+    experienceLevel,
+    skills,
+    companyLogo,
+    employmentType,
+    jobDescription,
+    postedBy,
+  } = req.body;
+
+  const {email} = req.user
+
+    
+    // Create a new job entry
     const newJob = new Job({
       jobTitle,
       companyName,
@@ -219,24 +274,26 @@ app.post("/job",authenticateToken, async  (req, res) => {
       jobLocation,
       postingDate,
       experienceLevel,
+      skills,
       companyLogo,
       employmentType,
       jobDescription,
-      postedBy:email,
-      skills,
+      postedBy: email,
     });
 
     // Save the job to the database
-   const data= await newJob.save();
-    console.log(data);
-    res.status(201).json({ message: 'Job created successfully', job: newJob });
+    const data = await newJob.save();
+    
+    res.status(201).json({ message: "Job created successfully", job: newJob });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating job', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error creating job", error: error.message });
   }
 });
 
 // Delete Job
-app.delete("/job",authenticateToken, async (req, res) => {
+app.delete("/job/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -244,14 +301,16 @@ app.delete("/job",authenticateToken, async (req, res) => {
     const deletedJob = await Job.findByIdAndDelete(id);
 
     if (!deletedJob) {
-      return res.status(404).json({ message: 'Job not found' });
+      return res.status(404).json({ message: "Job not found" });
     }
 
-    res.status(200).json({ message: 'Job deleted successfully', job: deletedJob });
+    res.status(200).json({ message: "Job deleted successfully", job: deletedJob });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting job', error: error.message });
+    res.status(500).json({ message: "Error deleting job", error: error.message });
   }
 });
+
+
 
 // Logout Route
 app.get("/auth/logout", (req, res) => {
@@ -275,11 +334,11 @@ app.post("/jobs", authenticateToken, async (req, res) => {
     res.status(500).json({ message: "Error posting job.", error });
   }
 });
-app.get("/user-job",authenticateToken, async (req, res) => {
+app.get("/user-job", authenticateToken, async (req, res) => {
   try {
-    const {email} = req.user
-    console.log(email)
-    const jobs = await Job.find({postedBy:email});
+    const { email } = req.user;
+    
+    const jobs = await Job.find({ postedBy: email });
     res.status(200).json(jobs);
   } catch (error) {
     res.status(500).json({ message: "Error fetching jobs.", error });
@@ -294,7 +353,7 @@ app.get("/all-jobs", async (req, res) => {
     res.status(500).json({ message: "Error fetching jobs.", error });
   }
 });
-app.get("/all-jobs/:id",authenticateToken, async (req, res) => {
+app.get("/all-jobs/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const jobs = await Job.findById(id);

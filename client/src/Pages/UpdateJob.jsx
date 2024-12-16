@@ -12,7 +12,7 @@ const UpdateJob = () => {
     companyLogo,
     experienceLevel,
     employmentType,
-    description,
+    jobDescription,
     jobLocation,
     salaryType,
     minPrice,
@@ -252,7 +252,7 @@ const UpdateJob = () => {
               className="create-job-input pl-3 py-1.5 focus:outline-none"
               rows={6}
               placeholder="Write your job description"
-              defaultValue={description}
+              defaultValue={jobDescription}
               {...register("jobDescription")}
             />
           </div>

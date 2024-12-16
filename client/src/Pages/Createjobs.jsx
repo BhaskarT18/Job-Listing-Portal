@@ -51,7 +51,7 @@ const Createjobs = () => {
     }
     if(res.ok && res.status==201)
     {
-      alert("User registered successfully!");
+      alert("Job Posted successfully!");
       reset();
     }
 
@@ -216,7 +216,7 @@ const Createjobs = () => {
               placeholder="Write your job description"
               {...register("jobDescription")}
             />
-          </div>
+          </div> 
 
           {/* last row */}
           <div className="w-full">

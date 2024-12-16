@@ -80,10 +80,11 @@ const MyJob = () => {
   const handleDelete = (id) => {
     fetch(`http://localhost:8000/job/${id}`, {
       method: "DELETE",
+      credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.acknowledged) {
+        if (data.message === "Job deleted successfully") {
           alert("Job Deleted Successfully");
           setJobs(jobs.filter((job) => job._id !== id)); // Update job list
         } else {
@@ -92,7 +93,7 @@ const MyJob = () => {
       })
       .catch((err) => console.error("Error deleting job:", err));
   };
-
+  
   return (
     <div className="max-w-screen-2xl container mx-auto xl:px-24 px-4">
       <div className="my-jobs-container">
