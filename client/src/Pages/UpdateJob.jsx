@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import CreatableSelect from "react-select/creatable";
 
 const UpdateJob = () => {
+
   const { id } = useParams();
   const {
     _id,
@@ -23,8 +24,10 @@ const UpdateJob = () => {
     postingDate,
     
   } = useLoaderData();
-  console.log(id);
-  console.log(companyLogo)
+  const optionss = skills.map((skill) => ({
+    value: skill,
+    label: skill,
+  }));
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState(null);
   const {
@@ -88,6 +91,7 @@ const UpdateJob = () => {
     } catch (error) {
       console.error("Error:", error); // Log any error that occurred during fetch
     }
+    
   };
   
   
@@ -209,7 +213,7 @@ const UpdateJob = () => {
             <div className="lg-:w-1/2 w-full">
               <label className="block mb-2 text-lg">Require Skill Sets</label>
               <CreatableSelect
-                defaultValue={skills}
+                defaultValue={optionss}
                 onChange={setSelectedOption}
                 options={options}
                 isMulti
