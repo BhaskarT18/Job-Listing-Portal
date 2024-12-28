@@ -24,10 +24,12 @@ const UpdateJob = () => {
     postingDate,
     
   } = useLoaderData();
-  const optionss = skills.map((skill) => ({
+  
+  const optionss = (skills || []).map((skill) => ({
     value: skill,
     label: skill,
   }));
+  
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState(null);
   const {

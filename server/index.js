@@ -78,7 +78,7 @@ const jobSchema = new mongoose.Schema({
   },
   skills: {
     type: [String], // array of strings for multiple skills
-    required: true,
+    
   },
   companyLogo: {
     type: String, // URL for the logo
@@ -201,6 +201,8 @@ app.put("/update-job/:id", authenticateToken, async (req, res) => {
     postedBy,
   } = req.body
   
+
+  
   try {
     const updatedJob = await Job.findByIdAndUpdate(
       id,
@@ -227,7 +229,6 @@ app.put("/update-job/:id", authenticateToken, async (req, res) => {
     if (!updatedJob) {
       return res.status(404).json({ message: "Job not found" });
     }
-
     // Send a success response with the updated job details
     res.status(200).json({
       message: "Job updated successfully",
@@ -241,7 +242,8 @@ app.put("/update-job/:id", authenticateToken, async (req, res) => {
       error: error.message,
     });
   }
-});
+  
+}); 
 
 app.post("/job", authenticateToken, async (req, res) => {
   try {
