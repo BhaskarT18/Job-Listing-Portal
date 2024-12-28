@@ -13,18 +13,16 @@ const Createjobs = () => {
     watch,
     formState: { errors },
   } = useForm();
-  useEffect(() => {
-    fetch("http://localhost:8000/protected",{credentials:"include"})
-      .then((res) => {
-       if(res.status==401)
-       {
-       navigate('/login')
-       }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+  fetch("http://localhost:8000/protected", { credentials: "include" })
+  .then((res) => {
+    if (res.status === 401) {
+      navigate("/login", { replace: true }); // Replaces the current entry
+    }
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+
   const onSubmit = async (data) => {
     data.skills = selectedOption?.map(option => option.value) || [];
   

@@ -30,16 +30,16 @@ const MyJob = () => {
   //   }
   // }, [searchText]);}
 
-  fetch("http://localhost:8000/protected",{credentials:"include"})
+  fetch("http://localhost:8000/protected", { credentials: "include" })
   .then((res) => {
-    if(res.status==401)
-    {
-      navigate("/login");
+    if (res.status === 401) {
+      navigate("/login", { replace: true }); // Replaces the current entry in the history stack
     }
   })
   .catch((err) => {
-  console.log(err);
+    console.log(err);
   });
+
     fetch(`http://localhost:8000/user-job`,{credentials:"include"})
       .then((res) => res.json())
       .then((data) => {
